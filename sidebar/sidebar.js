@@ -62,6 +62,7 @@ const el = {
   downloadBtn:     document.getElementById('download-btn'),
   modeFlat:        document.getElementById('mode-flat'),
   modeCategorized: document.getElementById('mode-categorized'),
+  pdfConvertCb:    document.getElementById('pdf-convert-cb'),
   // Progress
   progressOverlay: document.getElementById('progress-overlay'),
   progressFill:    document.getElementById('progress-fill'),
@@ -219,6 +220,7 @@ function handleScanPage(url) {
     currentCourseId = newCourseId;
     allFiles = [];
     filteredFiles = [];
+    el.pdfConvertCb.checked = false; // Reset PDF toggle
     showScanState('idle');
   }
 
@@ -519,8 +521,10 @@ async function startDownload() {
   el.progressOverlay.classList.remove('hidden');
   setProgress(0, selected.length, 'Starting...');
 
+  const convertToPdf = el.pdfConvertCb.checked;
+
   try {
-    await window.GCRZipper.downloadAsZip(selected, zipMode, (curr, total, name) => {
+    await window.GCRZipper.downloadAsZip(selected, zipMode, convertToPdf, (curr, total, name) => {
       setProgress(curr, total, 'Fetching ' + (curr + 1) + ' / ' + total + ': ' + name);
     });
     showToast('ZIP downloaded successfully!', 'success');

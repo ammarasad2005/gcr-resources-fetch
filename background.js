@@ -34,6 +34,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
   'https://www.googleapis.com/auth/classroom.announcements.readonly',
   'https://www.googleapis.com/auth/drive.readonly',
+  'https://www.googleapis.com/auth/drive.file',
   'email',
   'profile',
 ].join(' ');
@@ -55,7 +56,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
 
     case 'FETCH_WITH_AUTH':
-      handleFetchWithAuth(message.url, message.responseType, sendResponse);
+      handleFetchWithAuth(message, sendResponse);
       return true;
 
     case 'SIGN_OUT':
@@ -167,7 +168,9 @@ async function handleGetUserInfo(sendResponse) {
  * Proxies an authenticated fetch through the service worker.
  * Only allows requests to Google's API domains over HTTPS.
  */
-async function handleFetchWithAuth(url, responseType, sendResponse) {
+async function handleFetchWithAuth(message, sendResponse) {
+  const { url, responseType, method = 'GET', body, headers = {} } = message;
+
   const ALLOWED_ORIGINS = [
     'https://classroom.googleapis.com',
     'https://www.googleapis.com',
@@ -207,9 +210,15 @@ async function handleFetchWithAuth(url, responseType, sendResponse) {
   }
 
   try {
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const fetchOptions = {
+      method,
+      headers: { ...headers, Authorization: `Bearer ${token}` },
+    };
+    if (body) {
+      fetchOptions.body = body;
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     if (response.status === 401) {
       // Token rejected — clear stored tokens so user is prompted to re-sign in.
