@@ -523,7 +523,7 @@ function parseDriveUrl(href) {
       if (id) {
         return {
           id,
-          url: `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`,
+          url: `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}?alt=media`,
           ext: ''
         };
       }
