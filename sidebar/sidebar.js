@@ -261,13 +261,16 @@ async function handleDomScrapeResult(domFiles) {
   updateStatus('Found ' + domFiles.length + ' file(s) in DOM. Querying API...');
 
   let finalFiles = domFiles;
+  let apiErrors = [];
   if (currentCourseId && window.GCRFetcher) {
     try {
-      finalFiles = await window.GCRFetcher.fetchAllResources(
+      const result = await window.GCRFetcher.fetchAllResources(
         currentCourseId,
         domFiles,
         (msg) => updateStatus(msg)
       );
+      finalFiles = result.files || domFiles;
+      apiErrors = result.errors || [];
     } catch (err) {
       showToast('API scan incomplete -- showing DOM results only.', 'info');
     }
@@ -279,7 +282,21 @@ async function handleDomScrapeResult(domFiles) {
 
   showScanState('results');
   applyFilter(activeFilter);
-  showToast('Found ' + allFiles.length + ' file(s).', allFiles.length > 0 ? 'success' : 'info');
+
+  if (apiErrors && apiErrors.length > 0) {
+    const firstError = apiErrors[0];
+    if (apiErrors.length === 3) {
+      showToast(
+        'API scan failed (' + firstError.slice(0, 60) + '...). ' +
+        'Try Sign Out -> Sign In to refresh permissions.',
+        'error'
+      );
+    } else {
+      showToast('API scan incomplete: ' + firstError.slice(0, 60) + '...', 'warning');
+    }
+  } else {
+    showToast('Found ' + allFiles.length + ' file(s).', allFiles.length > 0 ? 'success' : 'info');
+  }
 }
 
 // ------------------------------------------------------------------

@@ -219,7 +219,19 @@ async function handleFetchWithAuth(url, responseType, sendResponse) {
     }
 
     if (!response.ok) {
-      sendResponse({ success: false, error: `HTTP ${response.status}: ${response.statusText}` });
+      let errorDetail = response.statusText;
+      try {
+        // Clone first so we can still read body on non-OK responses
+        const errJson = await response.clone().json();
+        const msg = errJson?.error?.message || errJson?.message;
+        if (msg) errorDetail = msg;
+      } catch {
+        try {
+          const errText = await response.text();
+          if (errText) errorDetail = errText.slice(0, 200); // cap length
+        } catch { /* ignore */ }
+      }
+      sendResponse({ success: false, error: `HTTP ${response.status}: ${errorDetail}` });
       return;
     }
 
