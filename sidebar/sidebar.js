@@ -558,8 +558,9 @@ function showToast(message, type) {
     setTimeout(() => {
       if (toast.parentNode) el.toastContainer.removeChild(toast);
     }, 220);
-  }, 3500);
+  }, 4000);
 }
+window.showToast = showToast;
 
 // ------------------------------------------------------------------
 // postMessage to parent (content.js)
