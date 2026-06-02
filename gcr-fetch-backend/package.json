@@ -1,0 +1,9 @@
+{
+  "name": "gcr-fetch-backend",
+  "version": "1.0.0",
+  "description": "Serverless OAuth token exchange backend for the GCR Fetch Chrome extension.",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}

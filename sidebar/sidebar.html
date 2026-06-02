@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://drive.google.com https://lh3.googleusercontent.com; connect-src 'self';" />
+  <title>GCR Fetch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="sidebar.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="sidebar-header" role="banner">
+    <div class="header-left">
+      <div class="logo-mark" aria-hidden="true">&#8595;</div>
+      <div class="header-title-group">
+        <h1 class="header-title">GCR Fetch</h1>
+        <p class="header-subtitle" id="course-name">Detecting course...</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-badge hidden" id="user-badge">
+        <img class="user-avatar" id="user-avatar" src="" alt="Signed in user" width="28" height="28" />
+      </div>
+      <button class="close-btn" id="close-btn" aria-label="Close GCR Fetch sidebar" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Auth panel (shown when NOT signed in) -->
+  <div class="auth-panel" id="auth-panel">
+    <div class="auth-illustration" aria-hidden="true">&#128274;</div>
+    <h2 class="auth-title">Sign in to continue</h2>
+    <p class="auth-hint">GCR Fetch needs access to your Google Classroom to find and download your course resources.</p>
+    <button class="btn-google-signin" id="signin-btn" aria-label="Sign in with Google">
+      <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.4 30.2 0 24 0 14.7 0 6.7 5.4 2.9 13.2l7.9 6.1C12.6 13 17.9 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17z"/>
+        <path fill="#FBBC05" d="M10.8 28.7A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7L2.4 13.2A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l8.2-6.1z"/>
+        <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.2-8.4 2.2-6.1 0-11.3-4.1-13.2-9.9l-8.2 6.1C6.6 42.6 14.7 48 24 48z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    <p class="auth-privacy">Your credentials are never stored on any server. Tokens are saved locally in your browser only.</p>
+  </div>
+
+  <!-- Main content (hidden until signed in) -->
+  <div class="main-content hidden" id="main-content">
+
+    <!-- User bar -->
+    <div class="user-bar" id="user-bar">
+      <span class="user-bar-email" id="user-bar-email"></span>
+      <button class="link-btn" id="signout-btn">Sign out</button>
+    </div>
+
+    <!-- Scan state idle -->
+    <div class="scan-state" id="scan-state-idle">
+      <div class="scan-illustration" aria-hidden="true">&#128194;</div>
+      <p class="scan-hint">Open a Google Classroom course, then click <strong>Scan</strong> to find all resources.</p>
+      <button class="btn btn-primary" id="scan-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+          <path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Scan for Resources
+      </button>
+    </div>
+
+    <!-- Scan state loading -->
+    <div class="scan-state hidden" id="scan-state-loading">
+      <div class="loader-ring" aria-label="Scanning..." role="status">
+        <div></div><div></div><div></div><div></div>
+      </div>
+      <p class="status-text" id="scan-status-text">Initialising...</p>
+    </div>
+
+    <!-- Results area -->
+    <div class="results-area hidden" id="results-area">
+      <div class="filter-bar" role="group" aria-label="File type filter">
+        <button class="filter-chip active" id="filter-all"       data-filter="all">All</button>
+        <button class="filter-chip"        id="filter-documents" data-filter="documents">Documents</button>
+        <button class="filter-chip"        id="filter-images"    data-filter="images">Images</button>
+      </div>
+      <div class="list-controls">
+        <span class="file-count" id="file-count">0 files</span>
+        <div class="bulk-actions">
+          <button class="link-btn" id="select-all-btn">Select All</button>
+          <span class="separator" aria-hidden="true">&middot;</span>
+          <button class="link-btn" id="deselect-all-btn">Deselect All</button>
+        </div>
+      </div>
+      <ul class="file-list" id="file-list" role="list" aria-label="Found files"></ul>
+      <div class="empty-state hidden" id="empty-state">
+        <span aria-hidden="true">&#128269;</span>
+        <p>No files match the current filter.</p>
+      </div>
+    </div>
+
+    <!-- Download bar -->
+    <div class="download-bar hidden" id="download-bar">
+      <div class="zip-mode-toggle" role="group" aria-label="ZIP structure">
+        <button class="mode-btn active" id="mode-flat"        data-mode="flat">Flat</button>
+        <button class="mode-btn"        id="mode-categorized" data-mode="categorized">By Topic</button>
+      </div>
+      <button class="btn btn-success" id="download-btn" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3v13M5 13l7 7 7-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 21h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+        Download ZIP
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Progress overlay -->
+  <div class="progress-overlay hidden" id="progress-overlay" role="status" aria-live="polite">
+    <div class="progress-card">
+      <div class="progress-icon" aria-hidden="true">&#128230;</div>
+      <p class="progress-title">Building ZIP...</p>
+      <div class="progress-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-track">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <p class="progress-detail" id="progress-detail">Fetching file 0 / 0</p>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <script src="../lib/jszip.min.js"></script>
+  <script src="../lib/fetcher.js"></script>
+  <script src="../lib/zipper.js"></script>
+  <script src="sidebar.js"></script>
+</body>
+</html>
