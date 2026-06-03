@@ -63,6 +63,7 @@ const el = {
   modeFlat:        document.getElementById('mode-flat'),
   modeCategorized: document.getElementById('mode-categorized'),
   pdfConvertCb:    document.getElementById('pdf-convert-cb'),
+  submissionsCb:   document.getElementById('submissions-cb'),
   // Progress
   progressOverlay: document.getElementById('progress-overlay'),
   progressFill:    document.getElementById('progress-fill'),
@@ -177,6 +178,10 @@ function wireEvents() {
     btn.addEventListener('click', () => setZipMode(btn.dataset.mode));
   });
 
+  el.submissionsCb.addEventListener('change', () => {
+    applyFilter(activeFilter);
+  });
+
   window.addEventListener('message', handleParentMessage);
 }
 
@@ -221,6 +226,7 @@ function handleScanPage(url) {
     allFiles = [];
     filteredFiles = [];
     el.pdfConvertCb.checked = false; // Reset PDF toggle
+    el.submissionsCb.checked = false; // Reset Submissions toggle
     showScanState('idle');
   }
 
@@ -277,6 +283,13 @@ async function handleDomScrapeResult(domFiles) {
       showToast('API scan incomplete -- showing DOM results only.', 'info');
     }
   }
+
+  // Default all files to selected = true
+  finalFiles.forEach((file) => {
+    if (file.selected === undefined) {
+      file.selected = true;
+    }
+  });
 
   allFiles      = finalFiles;
   activeFilter  = 'all';
@@ -367,6 +380,9 @@ function getFileExtension(filename) {
 }
 
 function matchesFilter(file, filter) {
+  const matchesSub = !file.isSubmission || el.submissionsCb.checked;
+  if (!matchesSub) return false;
+
   if (filter === 'all') return true;
   const ext = getFileExtension(file.name);
   if (filter === 'documents') return DOCUMENT_EXTS.has(ext);
@@ -426,9 +442,12 @@ function renderFileList(files) {
     checkbox.type = 'checkbox';
     checkbox.className = 'file-checkbox';
     checkbox.id = 'file-check-' + index;
-    checkbox.checked = true;
+    checkbox.checked = file.selected !== false;
     checkbox.setAttribute('aria-label', 'Select ' + file.name);
-    checkbox.addEventListener('change', updateDownloadBtn);
+    checkbox.addEventListener('change', () => {
+      file.selected = checkbox.checked;
+      updateDownloadBtn();
+    });
 
     const icon = document.createElement('span');
     icon.className = 'file-icon';
@@ -456,6 +475,7 @@ function renderFileList(files) {
     li.addEventListener('click', (e) => {
       if (e.target !== checkbox) {
         checkbox.checked = !checkbox.checked;
+        file.selected = checkbox.checked;
         updateDownloadBtn();
       }
     });
@@ -468,11 +488,16 @@ function renderFileList(files) {
 // Select / Deselect all
 // ------------------------------------------------------------------
 function selectAll() {
+  filteredFiles.forEach(f => f.selected = true);
   el.fileList.querySelectorAll('.file-checkbox').forEach((cb) => { cb.checked = true; });
   updateDownloadBtn();
 }
 
+// ------------------------------------------------------------------
+// Select / Deselect all
+// ------------------------------------------------------------------
 function deselectAll() {
+  filteredFiles.forEach(f => f.selected = false);
   el.fileList.querySelectorAll('.file-checkbox').forEach((cb) => { cb.checked = false; });
   updateDownloadBtn();
 }
@@ -481,12 +506,7 @@ function deselectAll() {
 // Download button state
 // ------------------------------------------------------------------
 function getSelectedFiles() {
-  const checkboxes = el.fileList.querySelectorAll('.file-checkbox');
-  const selected = [];
-  checkboxes.forEach((cb, i) => {
-    if (cb.checked) selected.push(filteredFiles[i]);
-  });
-  return selected.filter(Boolean);
+  return filteredFiles.filter(f => f.selected !== false);
 }
 
 function updateDownloadBtn() {
