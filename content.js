@@ -256,31 +256,38 @@ function scrapeDom() {
   }
 
   // ── Stream tab: posts with attachments ────────────────────────────
-  // Google Classroom Stream items typically live in elements with
-  // role="listitem" or specific data-* attributes. We look for anchor
-  // tags pointing to known file hosts.
   const streamLinks = document.querySelectorAll('a[href]');
   streamLinks.forEach((anchor) => {
     const href = anchor.href;
-    if (!isFileLink(href)) return;
-
     let name = deriveFilename(anchor, href);
     let url = href;
     const driveInfo = parseDriveUrl(href);
+
     if (driveInfo) {
       url = driveInfo.url;
       if (driveInfo.ext && !name.toLowerCase().endsWith(driveInfo.ext)) {
         name += driveInfo.ext;
       }
+      const topic = deriveTopicFromAnchor(anchor);
+      addFile({ name, url, topic, source: 'stream-dom' });
+    } else if (isFileLink(href)) {
+      const topic = deriveTopicFromAnchor(anchor);
+      addFile({ name, url, topic, source: 'stream-dom' });
+    } else if (isExternalDomLink(href)) {
+      const topic = deriveTopicFromAnchor(anchor);
+      const linkType = getExternalLinkType(href);
+      addFile({
+        name,
+        url,
+        topic,
+        source: 'stream-dom',
+        isExternalLink: true,
+        linkType
+      });
     }
-
-    const topic = deriveTopicFromAnchor(anchor);
-    addFile({ name, url, topic, source: 'stream-dom' });
   });
 
   // ── Classwork tab: topic sections with material cards ─────────────
-  // Topic headings vary by GCR version; we look for the header text
-  // nearest to each attachment link.
   const topicHeadings = document.querySelectorAll(
     '[class*="topic-title"], [class*="Topic"], h2, h3'
   );
@@ -291,19 +298,30 @@ function scrapeDom() {
     if (!parent) return;
     const links = parent.querySelectorAll('a[href]');
     links.forEach((a) => {
-      if (!isFileLink(a.href)) return;
+      const href = a.href;
+      let name = deriveFilename(a, href);
+      let url = href;
+      const driveInfo = parseDriveUrl(href);
 
-      let name = deriveFilename(a, a.href);
-      let url = a.href;
-      const driveInfo = parseDriveUrl(a.href);
       if (driveInfo) {
         url = driveInfo.url;
         if (driveInfo.ext && !name.toLowerCase().endsWith(driveInfo.ext)) {
           name += driveInfo.ext;
         }
+        addFile({ name, url, topic: topicName, source: 'classwork-dom' });
+      } else if (isFileLink(href)) {
+        addFile({ name, url, topic: topicName, source: 'classwork-dom' });
+      } else if (isExternalDomLink(href)) {
+        const linkType = getExternalLinkType(href);
+        addFile({
+          name,
+          url,
+          topic: topicName,
+          source: 'classwork-dom',
+          isExternalLink: true,
+          linkType
+        });
       }
-
-      addFile({ name, url, topic: topicName, source: 'classwork-dom' });
     });
   });
 
@@ -531,3 +549,69 @@ function parseDriveUrl(href) {
   } catch { /* ignore */ }
   return null;
 }
+
+/**
+ * Checks whether a DOM link is a valid external link (not internal GCR/Google accounts UI).
+ */
+function isExternalDomLink(href) {
+  if (!href) return false;
+  try {
+    const url = new URL(href);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname.toLowerCase();
+
+    // Ignore internal Classroom navigation
+    if (host.includes('classroom.google.com')) {
+      if (path === '/' || path.startsWith('/c/') || path.startsWith('/u/') || path.startsWith('/h') || path.startsWith('/g/')) {
+        return false;
+      }
+    }
+
+    // Ignore standard account or support services
+    const ignoredHosts = [
+      'accounts.google.com',
+      'support.google.com',
+      'myaccount.google.com',
+      'policies.google.com',
+      'google.com/intl'
+    ];
+    if (ignoredHosts.some((h) => host === h || host.endsWith('.' + h))) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Maps the URL hostname and path to a categorised linkType.
+ */
+function getExternalLinkType(href) {
+  try {
+    const url = new URL(href);
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname.toLowerCase();
+
+    if (host.includes('youtube.com') || host.includes('youtu.be')) {
+      return 'youtube';
+    }
+    if (host.includes('docs.google.com')) {
+      if (path.startsWith('/forms/')) return 'form';
+      if (path.startsWith('/drive/folders/')) return 'folder';
+    }
+    if (host.includes('forms.gle')) {
+      return 'form';
+    }
+    if (host.includes('drive.google.com')) {
+      if (path.startsWith('/drive/folders/')) return 'folder';
+    }
+    return 'link';
+  } catch {
+    return 'link';
+  }
+}
+
