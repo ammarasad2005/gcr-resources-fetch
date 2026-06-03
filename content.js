@@ -560,25 +560,18 @@ function isExternalDomLink(href) {
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
 
     const host = url.hostname.toLowerCase();
-    const path = url.pathname.toLowerCase();
 
-    // Ignore internal Classroom navigation
-    if (host.includes('classroom.google.com')) {
-      if (path === '/' || path.startsWith('/c/') || path.startsWith('/u/') || path.startsWith('/h') || path.startsWith('/g/')) {
+    // Ignore all google.com and subdomains except Drive, Docs, Sites, and Colab
+    if (host === 'google.com' || host.endsWith('.google.com')) {
+      const allowedSubdomains = [
+        'drive.google.com',
+        'docs.google.com',
+        'sites.google.com',
+        'colab.research.google.com'
+      ];
+      if (!allowedSubdomains.includes(host)) {
         return false;
       }
-    }
-
-    // Ignore standard account or support services
-    const ignoredHosts = [
-      'accounts.google.com',
-      'support.google.com',
-      'myaccount.google.com',
-      'policies.google.com',
-      'google.com/intl'
-    ];
-    if (ignoredHosts.some((h) => host === h || host.endsWith('.' + h))) {
-      return false;
     }
 
     return true;
