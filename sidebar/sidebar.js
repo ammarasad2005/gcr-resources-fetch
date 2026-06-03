@@ -407,7 +407,14 @@ function applyFilter(filter) {
 // ------------------------------------------------------------------
 // File list rendering -- entirely via createElement, no innerHTML
 // ------------------------------------------------------------------
-function getFileIcon(filename) {
+function getFileIcon(filename, file) {
+  if (file && file.isExternalLink) {
+    const lt = file.linkType || 'link';
+    if (lt === 'youtube') return '\uD83C\uDFA5'; // 🎥
+    if (lt === 'form')    return '\uD83D\uDCDD'; // 📝
+    if (lt === 'folder')  return '\uD83D\uDCC1'; // 📁
+    return '\uD83D\uDD17'; // 🔗
+  }
   const ext = getFileExtension(filename);
   if (ext === 'pdf')                        return '\uD83D\uDCD5';
   if (['ppt', 'pptx'].includes(ext))        return '\uD83D\uDCCA';
@@ -452,7 +459,7 @@ function renderFileList(files) {
     const icon = document.createElement('span');
     icon.className = 'file-icon';
     icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = getFileIcon(file.name);
+    icon.textContent = getFileIcon(file.name, file);
 
     const info = document.createElement('div');
     info.className = 'file-info';
