@@ -309,7 +309,7 @@ GCR Fetch was designed with a security-first mindset:
 
 ## License
 
-This project is open source. See the repository for license details.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
