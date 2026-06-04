@@ -4,6 +4,11 @@
   <strong>Bulk-download every resource from a Google Classroom course as a single ZIP archive.</strong>
 </p>
 
+<p align="center">
+  <a href="#install"><strong>🚀 Quick Install Guide (For Classmates)</strong></a> &nbsp;•&nbsp; 
+  <a href="#dev-setup"><strong>🛠️ Developer Setup & Self-Hosting</strong></a>
+</p>
+
 ---
 
 ## The Problem
@@ -163,6 +168,7 @@ gcr-resources-fetch/
 
 ---
 
+<a name="install"></a>
 ## Installation Guide (For Classmates & Users)
 
 Since this extension is not published on the Chrome Web Store, you'll need to load it manually in your browser. This takes less than a minute and requires no coding or credentials setup.
@@ -201,6 +207,7 @@ Since this extension is not published on the Chrome Web Store, you'll need to lo
 
 ---
 
+<a name="dev-setup"></a>
 ## Deployment & Setup Guide (For Developers & Self-Hosters)
 
 If you are a developer who has forked this repository and wants to run your own custom instance of GCR Fetch with your own Google Cloud project and hosting backend, follow the instructions below.
