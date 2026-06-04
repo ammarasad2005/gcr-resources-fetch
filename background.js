@@ -22,7 +22,7 @@
 'use strict';
 
 // ── Constants ──────────────────────────────────────────────────────
-const CLIENT_ID = '733752800537-nkiq0vdeeui30d5cfsokb1imld9e9e33.apps.googleusercontent.com';
+const CLIENT_ID = '30149362431-qq5ivt0rcsi178q3msf61ko5gvsblfhm.apps.googleusercontent.com';
 const EXTENSION_ID = 'fjcdbnkobmjngdbmgacmkgpggeblbhia';
 const REDIRECT_URI = `https://${EXTENSION_ID}.chromiumapp.org`;
 
