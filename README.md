@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="#install"><strong>🚀 Quick Install Guide (For Classmates)</strong></a> &nbsp;•&nbsp; 
+  <a href="#install"><strong>🚀 Quick Install Guide (For Users)</strong></a> &nbsp;•&nbsp; 
   <a href="#dev-setup"><strong>🛠️ Developer Setup & Self-Hosting</strong></a>
 </p>
 
@@ -169,7 +169,7 @@ gcr-resources-fetch/
 ---
 
 <a name="install"></a>
-## Installation Guide (For Classmates & Users)
+## Installation Guide (For Users)
 
 Since this extension is not published on the Chrome Web Store, you'll need to load it manually in your browser. This takes less than a minute and requires no coding or credentials setup.
 
