@@ -1,5 +1,6 @@
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArL/MfpLnzPLMyjgVNDi1a6ms7kl8tMpLoZQLWvvr82ycD5woIzCDDDuQIH4jDATF7eBcwsD6AXMBwFBx9mSDzrROlPnj3wxyrEN5AbR3tTWo9ZwC1Zuz6X35DeE0bOyTM5wnMh5uzhAx4tKOO3D5fh0/dyrfxLUzBytmAOotFLFBlUw4newZk5snevNjsJdoX48fSA8HbVGkFyZtwzcvjh78ul04aF0EgwuWhZVkSqZeNfdV9r830oofD3XqNiF4C4Bq4HA/YNRrN94gsXUM6kz8Gk9lqIPyz4goWEi10ymdS6br3+na3caKq+OHBFlgN+eljWwefOIVfpqisHbxfQIDAQAB",
   "name": "GCR Fetch",
   "version": "1.0.0",
   "description": "Bulk-download all resources from a Google Classroom course as a ZIP archive.",
@@ -52,7 +53,6 @@
       ]
     }
   ],
-
   "action": {
     "default_title": "GCR Fetch",
     "default_icon": {

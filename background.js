@@ -22,11 +22,11 @@
 'use strict';
 
 // ── Constants ──────────────────────────────────────────────────────
-const CLIENT_ID    = '733752800537-nkiq0vdeeui30d5cfsokb1imld9e9e33.apps.googleusercontent.com';
-const EXTENSION_ID = 'aendgiccddokneeecomkliljadbhbeji';
+const CLIENT_ID = '733752800537-nkiq0vdeeui30d5cfsokb1imld9e9e33.apps.googleusercontent.com';
+const EXTENSION_ID = 'fjcdbnkobmjngdbmgacmkgpggeblbhia';
 const REDIRECT_URI = `https://${EXTENSION_ID}.chromiumapp.org`;
 
-const BACKEND_URL  = 'https://gcr-fetch-backend.vercel.app';
+const BACKEND_URL = 'https://gcr-fetch-backend.vercel.app';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
@@ -271,21 +271,21 @@ async function handleFetchWithAuth(message, sendResponse) {
 
 function buildAuthUrl() {
   const params = new URLSearchParams({
-    client_id:     CLIENT_ID,
-    redirect_uri:  REDIRECT_URI,
+    client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI,
     response_type: 'code',
-    scope:         SCOPES,
-    access_type:   'offline',
-    prompt:        'consent',   // Always show consent to get a refresh token.
+    scope: SCOPES,
+    access_type: 'offline',
+    prompt: 'consent',   // Always show consent to get a refresh token.
   });
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
 async function exchangeCodeForTokens(code) {
   const res = await fetch(`${BACKEND_URL}/api/token`, {
-    method:  'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ grantType: 'authorization_code', code }),
+    body: JSON.stringify({ grantType: 'authorization_code', code }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Token exchange failed.');
@@ -294,9 +294,9 @@ async function exchangeCodeForTokens(code) {
 
 async function refreshAccessToken(refreshToken) {
   const res = await fetch(`${BACKEND_URL}/api/token`, {
-    method:  'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ grantType: 'refresh_token', refreshToken }),
+    body: JSON.stringify({ grantType: 'refresh_token', refreshToken }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Token refresh failed.');
@@ -306,8 +306,8 @@ async function refreshAccessToken(refreshToken) {
 async function storeTokens(tokens) {
   const expiry = Date.now() + (tokens.expires_in * 1000);
   const toStore = {
-    gcr_access_token:  tokens.access_token,
-    gcr_token_expiry:  expiry,
+    gcr_access_token: tokens.access_token,
+    gcr_token_expiry: expiry,
   };
   if (tokens.refresh_token) {
     toStore.gcr_refresh_token = tokens.refresh_token;
@@ -355,8 +355,8 @@ async function fetchUserInfo(accessToken) {
   const data = await res.json();
   // Return only the fields we need.
   return {
-    email:   data.email   || '',
-    name:    data.name    || '',
+    email: data.email || '',
+    name: data.name || '',
     picture: data.picture || '',
   };
 }

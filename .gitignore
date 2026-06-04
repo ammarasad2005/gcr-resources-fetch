@@ -4,3 +4,5 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.zip
+extract-key.js
+build-zip.ps1
