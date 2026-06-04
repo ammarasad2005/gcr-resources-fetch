@@ -19,7 +19,7 @@
 'use strict';
 
 // Your Chrome Extension ID — update this if the ID ever changes.
-const EXTENSION_ID    = 'aendgiccddokneeecomkliljadbhbeji';
+const EXTENSION_ID    = 'fjcdbnkobmjngdbmgacmkgpggeblbhia';
 const ALLOWED_ORIGIN  = `chrome-extension://${EXTENSION_ID}`;
 
 // Google OAuth token endpoint.
