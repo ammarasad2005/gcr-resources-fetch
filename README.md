@@ -163,103 +163,101 @@ gcr-resources-fetch/
 
 ---
 
-## Setup Instructions (Developer Mode)
+## Installation Guide (For Classmates & Users)
 
-Since this extension is not published on the Chrome Web Store, you'll need to install it manually using Chrome's Developer Mode. Here's how:
+Since this extension is not published on the Chrome Web Store, you'll need to load it manually in your browser. This takes less than a minute and requires no coding or credentials setup.
 
 ### Prerequisites
-
-- **Google Chrome** (or any Chromium-based browser like Edge, Brave, etc.)
-- The extension source code (clone or download this repository)
+- A Chromium-based browser (Google Chrome, Microsoft Edge, Brave, Opera, etc.)
+- The extension folder (downloaded from this repository)
 
 ### Step-by-Step Installation
 
-1. **Clone or download the repository**
+1. **Download the Extension Code**
+   - Click the green **Code** button at the top of this GitHub repository page, and click **Download ZIP**.
+   - Extract the downloaded ZIP file to a folder on your computer (e.g., in your Documents folder).
 
-   ```bash
-   git clone https://github.com/ammarasad2005/gcr-resources-fetch.git
-   cd gcr-resources-fetch
-   ```
-
-   Or download the ZIP from GitHub and extract it to a folder on your computer.
-
-2. **Open Chrome's Extension Management page**
-
-   - Type `chrome://extensions` in the Chrome address bar and press Enter
-   - Alternatively, go to Chrome Menu → More Tools → Extensions
+2. **Open Extensions Management**
+   - In Chrome, open a new tab and go to `chrome://extensions` (or go to **Menu > Extensions > Manage Extensions**).
 
 3. **Enable Developer Mode**
+   - Toggle the **Developer mode** switch in the top-right corner to **ON**.
 
-   - In the top-right corner of the Extensions page, toggle the **Developer mode** switch to **ON**
+4. **Load the Extension**
+   - Click the **Load unpacked** button in the top-left corner.
+   - Select the folder you extracted in Step 1 (the one containing the `manifest.json` file).
+   - Click **Select Folder**.
 
-4. **Load the extension**
+5. **Pin the Extension (Optional)**
+   - Click the puzzle piece icon in the top-right corner of your browser toolbar, find **GCR Fetch**, and click the pin icon.
 
-   - Click the **"Load unpacked"** button (appears after enabling Developer Mode)
-   - Navigate to and select the `gcr-resources-fetch` folder (the root folder containing `manifest.json`)
-   - Click **Select Folder**
+6. **Start Using It**
+   - Go to [Google Classroom](https://classroom.google.com).
+   - Open any course page.
+   - You will see a floating **⬇ GCR Fetch** button in the bottom-right corner. Click it to open the sidebar, log in, and scan your course resources!
 
-5. **Verify installation**
-
-   - The extension should now appear in your extensions list as **"GCR Fetch"**
-   - You should see the GCR Fetch icon in your Chrome toolbar (you may need to pin it using the puzzle piece icon)
-
-6. **Use it**
-
-   - Navigate to [Google Classroom](https://classroom.google.com)
-   - Open any course
-   - The **"GCR Fetch"** floating button will appear in the bottom-right corner
-   - Click it to open the sidebar, sign in with your Google account, and start scanning!
-
-### Important Notes
-
-- **The backend must be deployed** for the OAuth flow to work. The extension communicates with a Vercel serverless function at `https://gcr-fetch-backend.vercel.app/api/token` for token exchange. If you're forking this project, you'll need to deploy your own Vercel backend and update the `BACKEND_URL` constant in `background.js` as well as the `EXTENSION_ID` in both `background.js` and `gcr-fetch-backend/api/token.js`.
-- **Do not modify files inside the loaded extension folder** while Chrome is running, as changes will be auto-detected and the extension will reload. Use the circular refresh arrow on the extension card if you make changes.
-- **Permissions**: The extension requests access to your Google Classroom courses, coursework materials, Drive files, and basic profile info. All API calls are proxied through the service worker with a strict origin allowlist — no data is sent to any third-party server.
+> [!NOTE]
+> **No Developer Setup Needed**: The extension is already pre-configured to use our secure, hosted backend and Google OAuth Client credentials. You only need to sign in using your university `@isb.nu.edu.pk` email address to use it.
 
 ---
 
-## Backend Deployment (For Contributors)
+## Deployment & Setup Guide (For Developers & Self-Hosters)
 
-If you want to deploy your own instance of the OAuth backend:
+If you are a developer who has forked this repository and wants to run your own custom instance of GCR Fetch with your own Google Cloud project and hosting backend, follow the instructions below.
 
-1. **Fork this repository**
-
-2. **Deploy to Vercel**
-
+### 1. Backend Deployment (Vercel)
+The extension securely exchanges authorization codes for API tokens using a serverless backend to keep client secrets safe.
+1. Navigate to the backend folder:
    ```bash
    cd gcr-fetch-backend
+   ```
+2. Install the Vercel CLI globally (if you haven't already):
+   ```bash
    npm install -g vercel
+   ```
+3. Authenticate and deploy the backend:
+   ```bash
    vercel login
+   # Run the deployment and link it to your account
    vercel --prod
    ```
+   Note down your deployed backend URL (e.g., `https://your-project.vercel.app`).
 
-3. **Set environment variables in Vercel**
+### 2. Google Cloud Platform Configuration
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project.
+3. Enable the following APIs:
+   - **Google Classroom API**
+   - **Google Drive API**
+4. Set up your **OAuth Consent Screen**:
+   - Set the User Type to **Internal** (if deploying within your university/organization domain) or **External** (if deploying publicly).
+   - Add the necessary scopes: `classroom.courses.readonly`, `classroom.coursework.me.readonly`, `classroom.courseworkmaterials.readonly`, `classroom.announcements.readonly`, `drive.readonly`, and `drive.file`.
+5. Create credentials:
+   - Click **Create Credentials > OAuth client ID**.
+   - Select **Web application** as the application type.
+   - Under **Authorized redirect URIs**, add `https://<YOUR_CHROME_EXTENSION_ID>.chromiumapp.org` (replace with your extension's ID, which you can find in `chrome://extensions` after loading it).
+   - Copy the generated **Client ID** and **Client Secret**.
 
-   Go to your Vercel project dashboard → Settings → Environment Variables and add:
+### 3. Configure Environment Variables
+In your Vercel project dashboard (Settings > Environment Variables), add the following:
+- `GCR_CLIENT_ID`: Your Google OAuth Client ID.
+- `GCR_CLIENT_SECRET`: Your Google OAuth Client Secret.
 
-   | Variable | Description |
-   |---|---|
-   | `GCR_CLIENT_ID` | Your Google OAuth 2.0 Client ID |
-   | `GCR_CLIENT_SECRET` | Your Google OAuth 2.0 Client Secret |
+Redeploy the backend to apply these variables:
+```bash
+vercel --prod --force
+```
 
-4. **Create a Google Cloud project and OAuth credentials**
+### 4. Update Extension Code Configurations
+In your local repository, configure the following:
 
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project
-   - Enable the Google Classroom API and Google Drive API
-   - Create OAuth 2.0 credentials (Chrome extension type)
-   - Set the redirect URI to `https://<YOUR_EXTENSION_ID>.chromiumapp.org`
-   - Use the Client ID and Client Secret as Vercel environment variables
+- **In [background.js](file:///e:/gcr-resources-fetch/background.js)**:
+  - Update `CLIENT_ID` with your new Google Client ID.
+  - Update `EXTENSION_ID` with your local extension ID.
+  - Update `BACKEND_URL` with your Vercel deployment URL.
 
-5. **Update the extension constants**
-
-   In `background.js`, update:
-   - `CLIENT_ID` — your Google OAuth Client ID
-   - `EXTENSION_ID` — your extension's ID (from `chrome://extensions` after loading unpacked)
-   - `BACKEND_URL` — your Vercel deployment URL
-
-   In `gcr-fetch-backend/api/token.js`, update:
-   - `EXTENSION_ID` — must match the extension's actual ID
+- **In [gcr-fetch-backend/api/token.js](file:///e:/gcr-resources-fetch/gcr-fetch-backend/api/token.js)**:
+  - Update `EXTENSION_ID` to match your extension ID (used for CORS policy verification).
 
 ---
 
