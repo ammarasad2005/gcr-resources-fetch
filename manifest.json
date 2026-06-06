@@ -26,7 +26,8 @@
     "https://classroom.googleapis.com/*",
     "https://www.googleapis.com/*",
     "https://drive.google.com/*",
-    "https://docs.google.com/*"
+    "https://docs.google.com/*",
+    "https://gcr-fetch-backend.vercel.app/*"
   ],
   "background": {
     "service_worker": "background.js",
