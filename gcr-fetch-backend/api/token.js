@@ -18,19 +18,25 @@
 
 'use strict';
 
-// Your Chrome Extension ID — update this if the ID ever changes.
-const EXTENSION_ID    = 'fjcdbnkobmjngdbmgacmkgpggeblbhia';
-const ALLOWED_ORIGIN  = `chrome-extension://${EXTENSION_ID}`;
+// Chrome Extension Configuration
+const CHROME_EXTENSION_ID = 'fjcdbnkobmjngdbmgacmkgpggeblbhia';
+const CHROME_ALLOWED_ORIGIN = `chrome-extension://${CHROME_EXTENSION_ID}`;
+const CHROME_REDIRECT_URI = `https://${CHROME_EXTENSION_ID}.chromiumapp.org`;
+
+// Firefox Extension Configuration (Gecko ID: gcr-fetch@ammarasad.com)
+const FIREFOX_REDIRECT_URI = 'http://127.0.0.1/mozoauth2/092c675322164b5501eb08e6e6f5e09fa69bd4cc';
 
 // Google OAuth token endpoint.
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
-// Redirect URI registered in Google Cloud Console.
-const REDIRECT_URI = `https://${EXTENSION_ID}.chromiumapp.org`;
-
 module.exports = async function handler(req, res) {
   // ── CORS ──────────────────────────────────────────────────────────
-  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  const origin = req.headers.origin || '';
+  let allowedOrigin = CHROME_ALLOWED_ORIGIN;
+  if (origin === CHROME_ALLOWED_ORIGIN || origin.startsWith('moz-extension://')) {
+    allowedOrigin = origin;
+  }
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -62,12 +68,16 @@ module.exports = async function handler(req, res) {
 
   const { grantType, code, refreshToken } = body || {};
 
+  const origin = req.headers.origin || '';
+  const isFirefox = origin.startsWith('moz-extension://');
+  const redirectUri = isFirefox ? FIREFOX_REDIRECT_URI : CHROME_REDIRECT_URI;
+
   // ── Route to appropriate grant ────────────────────────────────────
   if (grantType === 'authorization_code') {
     if (!code || typeof code !== 'string' || code.length > 512) {
       return res.status(400).json({ error: 'Invalid or missing code.' });
     }
-    return await exchangeCode(res, CLIENT_ID, CLIENT_SECRET, code);
+    return await exchangeCode(res, CLIENT_ID, CLIENT_SECRET, code, redirectUri);
   }
 
   if (grantType === 'refresh_token') {
@@ -81,12 +91,12 @@ module.exports = async function handler(req, res) {
 };
 
 // ── Authorization code exchange ────────────────────────────────────
-async function exchangeCode(res, clientId, clientSecret, code) {
+async function exchangeCode(res, clientId, clientSecret, code, redirectUri) {
   const params = new URLSearchParams({
     code,
     client_id:     clientId,
     client_secret: clientSecret,
-    redirect_uri:  REDIRECT_URI,
+    redirect_uri:  redirectUri,
     grant_type:    'authorization_code',
   });
 

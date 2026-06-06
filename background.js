@@ -24,7 +24,11 @@
 // ── Constants ──────────────────────────────────────────────────────
 const CLIENT_ID = '30149362431-qq5ivt0rcsi178q3msf61ko5gvsblfhm.apps.googleusercontent.com';
 const EXTENSION_ID = 'fjcdbnkobmjngdbmgacmkgpggeblbhia';
-const REDIRECT_URI = `https://${EXTENSION_ID}.chromiumapp.org`;
+
+const isFirefox = typeof browser !== 'undefined' || (typeof chrome !== 'undefined' && chrome.runtime.getURL && chrome.runtime.getURL('').startsWith('moz-extension://'));
+const REDIRECT_URI = isFirefox
+  ? 'http://127.0.0.1/mozoauth2/092c675322164b5501eb08e6e6f5e09fa69bd4cc'
+  : `https://${EXTENSION_ID}.chromiumapp.org`;
 
 const BACKEND_URL = 'https://gcr-fetch-backend.vercel.app';
 
