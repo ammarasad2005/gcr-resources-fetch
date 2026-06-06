@@ -33,8 +33,10 @@ module.exports = async function handler(req, res) {
   // ── CORS ──────────────────────────────────────────────────────────
   const origin = req.headers.origin || '';
   let allowedOrigin = CHROME_ALLOWED_ORIGIN;
-  if (origin === CHROME_ALLOWED_ORIGIN || origin.startsWith('moz-extension://')) {
+  if (origin === CHROME_ALLOWED_ORIGIN || origin.startsWith('moz-extension://') || origin === 'null') {
     allowedOrigin = origin;
+  } else if (!origin) {
+    allowedOrigin = '*';
   }
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -69,7 +71,8 @@ module.exports = async function handler(req, res) {
   const { grantType, code, refreshToken } = body || {};
 
   const origin = req.headers.origin || '';
-  const isFirefox = origin.startsWith('moz-extension://');
+  const userAgent = req.headers['user-agent'] || '';
+  const isFirefox = origin.startsWith('moz-extension://') || userAgent.includes('Firefox');
   const redirectUri = isFirefox ? FIREFOX_REDIRECT_URI : CHROME_REDIRECT_URI;
 
   // ── Route to appropriate grant ────────────────────────────────────
