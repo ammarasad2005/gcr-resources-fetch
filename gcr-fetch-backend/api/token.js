@@ -70,7 +70,6 @@ module.exports = async function handler(req, res) {
 
   const { grantType, code, refreshToken } = body || {};
 
-  const origin = req.headers.origin || '';
   const userAgent = req.headers['user-agent'] || '';
   const isFirefox = origin.startsWith('moz-extension://') || userAgent.includes('Firefox');
   const redirectUri = isFirefox ? FIREFOX_REDIRECT_URI : CHROME_REDIRECT_URI;
